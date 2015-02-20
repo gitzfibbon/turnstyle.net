@@ -14,10 +14,28 @@ namespace Turnstyle.Client
 
         public static string Access()
         {
-            return "";
+            string username = "";
+            string password = "";
+
+            FormUrlEncodedContent content = new FormUrlEncodedContent(new[] 
+            {
+                new KeyValuePair<string, string>("grant_type", "client_credentials")
+            });
+
+            string resultContent;
+            using (TurnstyleHttpClient client = new TurnstyleHttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(String.Format("{0}:{1}", username, password))));
+
+                HttpResponseMessage result = client.PostAsync("/access", content).Result;
+                resultContent = result.Content.ReadAsStringAsync().Result;
+            }
+
+            return resultContent;
+
         }
 
-        public static async Task<string> Venues(string access_token)
+        public static string Venues(string access_token)
         {
             // http://api.getturnstyle.com/venues?access_token=abc123
 
@@ -25,7 +43,7 @@ namespace Turnstyle.Client
 
             using (TurnstyleHttpClient client = new TurnstyleHttpClient())
             {
-                HttpResponseMessage response = await client.GetAsync(requestUri);
+                HttpResponseMessage response = client.GetAsync(requestUri).Result;
                 return response.Content.ReadAsAsync<string>().Result;
 
                 //if (response.IsSuccessStatusCode)

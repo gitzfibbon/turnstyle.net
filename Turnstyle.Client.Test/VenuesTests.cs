@@ -9,7 +9,7 @@ namespace Turnstyle.Client.Tests
         [TestMethod]
         public void VenuesTest1()
         {
-            var x = TurnstyleApi.Venues(TurnstyleApi.Access()).Result;
+            var x = TurnstyleApi.Venues(TurnstyleApi.Access());
         }
     }
 }

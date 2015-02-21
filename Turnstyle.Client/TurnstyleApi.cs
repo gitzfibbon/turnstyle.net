@@ -9,6 +9,18 @@ using System.Web.Helpers;
 
 namespace Turnstyle.Client
 {
+    /// <summary>
+    /// Provides methods to use the Turnstyle API
+    /// </summary>
+    /// <remarks>
+    /// Design Notes:
+    /// 
+    /// 1.  Methods are asynchronous. Use the Task.Result property to wait for async methods to complete.
+    /// 
+    /// 2.  Dynamic objects are returned instead of strongly types objects. This reduces the need for
+    ///     updating the client library if the Turnstyle API return types are modified.
+    /// 
+    /// </remarks>
     public class TurnstyleApi
     {
         public const string baseAddress = "http://api.getturnstyle.com";
@@ -43,6 +55,21 @@ namespace Turnstyle.Client
         public static async Task<dynamic> GetVenues(string access_token)
         {
             string requestUri = String.Format("venues?access_token={0}", access_token);
+
+            using (TurnstyleHttpClient client = new TurnstyleHttpClient())
+            {
+                HttpResponseMessage response = await client.GetAsync(requestUri);
+                string json = response.Content.ReadAsStringAsync().Result;
+                return Json.Decode(json);
+            }
+        }
+
+        /// <summary>
+        /// http://api.getturnstyle.com/venue/400/nodes/status?access_token=abc123def
+        /// </summary>
+        public static async Task<dynamic> GetVenueNodeStatus(string access_token, int venue_id)
+        {
+            string requestUri = String.Format("venue/{0}/nodes/status?access_token={1}", venue_id, access_token);
 
             using (TurnstyleHttpClient client = new TurnstyleHttpClient())
             {

@@ -9,7 +9,8 @@ namespace Turnstyle.Client.Tests
         [TestMethod]
         public void VenuesTest1()
         {
-            var x = TurnstyleApi.Venues(TurnstyleApi.Access());
+            string access_token = TurnstyleApi.PostAccess().Result.access_token;
+            dynamic venue1 = TurnstyleApi.GetVenues(access_token).Result[0].name;
         }
     }
 }

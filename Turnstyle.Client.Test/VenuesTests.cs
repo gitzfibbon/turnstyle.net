@@ -10,9 +10,10 @@ namespace Turnstyle.Client.Tests
         public void VenuesTest1()
         {
             string access_token = TurnstyleApi.PostAccess().Result.access_token;
-            int venue1 = Int32.Parse(TurnstyleApi.GetVenues(access_token).Result[0].id);
-            int venue1NodeStatus = Int32.Parse(TurnstyleApi.GetVenueNodeStatus(access_token, venue1).Result[0].last_checkin);
+            int venue_id = Int32.Parse(TurnstyleApi.GetVenues(access_token).Result[0].id);
+            int venueNodeStatus = Int32.Parse(TurnstyleApi.GetVenueNodeStatus(access_token, venue_id).Result[0].last_checkin);
 
+            dynamic dataVisitors = TurnstyleApi.GetDataVisitors(access_token, venue_id, DateTime.Now.AddDays(-3), 2).Result;
         }
     }
 }

@@ -79,5 +79,22 @@ namespace Turnstyle.Client
             }
         }
 
+        /// <summary>
+        /// http://api.getturnstyle.com/data/venue/{venue_id}/visitor-data?access_token=abc123&start=1370044800&length=1
+        /// </summary>
+        public static async Task<dynamic> GetDataVisitors(string access_token, int venue_id, DateTime start, int length)
+        {
+            string requestUri = String.Format("data/venue/{0}/visitor-data?access_token={1}&start={2}&length={3}",
+                venue_id, access_token, Helpers.ConvertDateTimeToUnixTimeStamp(start), length);
+
+            using (TurnstyleHttpClient client = new TurnstyleHttpClient())
+            {
+                HttpResponseMessage response = await client.GetAsync(requestUri);
+                string json = response.Content.ReadAsStringAsync().Result;
+                return Json.Decode(json);
+            }
+        }
+
+
     }
 }

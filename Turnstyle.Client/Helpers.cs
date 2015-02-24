@@ -8,18 +8,19 @@ namespace Turnstyle.Client
 {
     internal class Helpers
     {
-        public static DateTime ConvertUnixTimeStampToDateTime(double unixTimeStamp)
+        public static DateTime ConvertUnixTimeStampToDateTime(double unixTimeStampUtc)
         {
             // Unix timestamp is seconds past epoch
-            DateTime result = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
-            result = result.AddSeconds(unixTimeStamp).ToLocalTime();
+            DateTime result = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            result = result.AddSeconds(unixTimeStampUtc).ToLocalTime();
             return result;
         }
 
-        public static long ConvertDateTimeToUnixTimeStamp(DateTime dateTime)
+        public static long ConvertDateTimeToUnixTimeStamp(DateTime dateTimeUtc)
         {
-            TimeSpan timeSpan = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0));
-            return (long)timeSpan.TotalSeconds;
+            TimeSpan timeSpan = (dateTimeUtc - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+            long result = (long)timeSpan.TotalSeconds;
+            return result;
         }
     }
 }

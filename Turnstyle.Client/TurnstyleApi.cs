@@ -23,7 +23,6 @@ namespace Turnstyle.Client
     /// </remarks>
     public class TurnstyleApi
     {
-        public const string baseAddress = "http://api.getturnstyle.com";
 
         /// <summary>
         /// Makes a Basic Authorization http request to get an access_token
@@ -49,8 +48,82 @@ namespace Turnstyle.Client
             }
         }
 
+
         /// <summary>
-        /// Eg. http://api.getturnstyle.com/venues?access_token=abc123
+        /// http://api.getturnstyle.com/data/venue/{venue_id}/count?access_token={access_token}&start={start_date}&length={length_in_days}&cmp={cmp_string}
+        /// </summary>
+        public static async Task<dynamic> GetCount(string access_token, string venue_id, DateTime start_date, int? length_in_days = null, List<DateTime> cmp_dates = null)
+        {
+            // Optional
+            string length = String.Empty;
+            if (null != length_in_days)
+            {
+                length = String.Format("&length={0}", length_in_days);
+            }
+
+            // Optional
+            string cmp = String.Empty;
+            if (null != cmp_dates)
+            {
+                string dates_string = String.Empty;
+                foreach (DateTime cmp_date in cmp_dates)
+                {
+                    dates_string = String.Concat(dates_string, ",", Helpers.ConvertDateTimeToUnixTime(cmp_date).ToString());
+                }
+
+                // Remove the prepended comma
+                if (dates_string.StartsWith(","))
+                {
+                    dates_string = dates_string.Substring(1);
+                }
+
+                cmp = String.Format("&cmp={0}", dates_string);
+            }
+
+            string requestUri = String.Format("data/venue/{0}/count?access_token={1}&start={2}{3}{4}",
+                venue_id, access_token, Helpers.ConvertDateTimeToUnixTime(start_date), length, cmp);
+
+            using (TurnstyleHttpClient client = new TurnstyleHttpClient())
+            {
+                HttpResponseMessage response = await client.GetAsync(requestUri);
+                string json = response.Content.ReadAsStringAsync().Result;
+                return Json.Decode(json);
+            }
+        }
+
+
+        /// <summary>
+        /// http://api.getturnstyle.com/data/venue/{venue_id}/visitor-data?access_token=abc123&start=1370044800&length=1
+        /// </summary>
+        public static async Task<dynamic> GetDataVisitors(string access_token, string venue_id, DateTime start_date, int length)
+        {
+            string requestUri = String.Format("data/venue/{0}/visitor-data?access_token={1}&start={2}&length={3}",
+                venue_id, access_token, Helpers.ConvertDateTimeToUnixTime(start_date), length);
+
+            using (TurnstyleHttpClient client = new TurnstyleHttpClient())
+            {
+                HttpResponseMessage response = await client.GetAsync(requestUri);
+                string json = response.Content.ReadAsStringAsync().Result;
+                return Json.Decode(json);
+            }
+        }
+
+
+        /// <summary>
+        /// http://api.getturnstyle.com/loctrigger?access_token={access_token}&venueID={venueID}&clientMAC={client_mac_address}&rssThreshold={rss_threshold}&webserviceURL={webservice_url}
+        /// </summary>
+        public static async Task<dynamic> GetLocationTrigger(string access_token, string venue_id, string client_mac_address, string rss_threshold, string webservice_url)
+        {
+            string requestUri = String.Format("loctrigger?access_token={0}venueID={1}&clientMAC={2}&rssThreshold={3}&webserviceURL={4}",
+                access_token, venue_id, client_mac_address, rss_threshold, webservice_url);
+
+            return null; // until we can manage (view, edit, delete) location triggers
+            // return await TurnstyleHttpClient.Get(requestUri);
+        }
+
+
+        /// <summary>
+        /// http://api.getturnstyle.com/venues?access_token=abc123
         /// </summary>
         public static async Task<dynamic> GetVenues(string access_token)
         {
@@ -64,12 +137,22 @@ namespace Turnstyle.Client
             }
         }
 
+
         /// <summary>
-        /// http://api.getturnstyle.com/venue/400/nodes/status?access_token=abc123def
+        /// http://api.getturnstyle.com/venue/456/nodes/status?access_token=abc123def
         /// </summary>
-        public static async Task<dynamic> GetVenueNodeStatus(string access_token, int venue_id)
+        /// <remarks>
+        /// The API doc doesn't show any example of how node_mac_address is used. It's use isn't tested in this method.
+        /// </remarks>
+        public static async Task<dynamic> GetVenueNodeStatus(string access_token, string venue_id, string node_mac_address = null)
         {
-            string requestUri = String.Format("venue/{0}/nodes/status?access_token={1}", venue_id, access_token);
+            string mac_address = String.Empty;
+            if (!String.IsNullOrWhiteSpace(node_mac_address))
+            {
+                mac_address = String.Format("?mac_address={0}", node_mac_address);
+            }
+
+            string requestUri = String.Format("venue/{0}/nodes/status?access_token={1}{2}", venue_id, access_token, mac_address);
 
             using (TurnstyleHttpClient client = new TurnstyleHttpClient())
             {
@@ -79,21 +162,6 @@ namespace Turnstyle.Client
             }
         }
 
-        /// <summary>
-        /// http://api.getturnstyle.com/data/venue/{venue_id}/visitor-data?access_token=abc123&start=1370044800&length=1
-        /// </summary>
-        public static async Task<dynamic> GetDataVisitors(string access_token, int venue_id, DateTime start, int length)
-        {
-            string requestUri = String.Format("data/venue/{0}/visitor-data?access_token={1}&start={2}&length={3}",
-                venue_id, access_token, Helpers.ConvertDateTimeToUnixTimeStamp(start), length);
-
-            using (TurnstyleHttpClient client = new TurnstyleHttpClient())
-            {
-                HttpResponseMessage response = await client.GetAsync(requestUri);
-                string json = response.Content.ReadAsStringAsync().Result;
-                return Json.Decode(json);
-            }
-        }
 
 
     }

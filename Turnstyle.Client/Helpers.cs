@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Turnstyle.Client
 {
-    internal class Helpers
+    public class Helpers
     {
-        public static DateTime ConvertUnixTimeStampToDateTime(double unixTimeStampUtc)
+        public static DateTime ConvertUnixTimeToDateTime(double unixTimeStampUtc)
         {
             // Unix timestamp is seconds past epoch
             DateTime result = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
@@ -16,7 +16,7 @@ namespace Turnstyle.Client
             return result;
         }
 
-        public static long ConvertDateTimeToUnixTimeStamp(DateTime dateTimeUtc)
+        public static long ConvertDateTimeToUnixTime(DateTime dateTimeUtc)
         {
             TimeSpan timeSpan = (dateTimeUtc - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc));
             long result = (long)timeSpan.TotalSeconds;

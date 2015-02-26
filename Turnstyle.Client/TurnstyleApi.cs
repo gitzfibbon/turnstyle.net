@@ -52,6 +52,9 @@ namespace Turnstyle.Client
         /// <summary>
         /// http://api.getturnstyle.com/data/venue/{venue_id}/count?access_token={access_token}&start={start_date}&length={length_in_days}&cmp={cmp_string}
         /// </summary>
+        /// <remarks>
+        /// Might need to be updated. Still trying to understand the API parameters.
+        /// </remarks>
         public static async Task<dynamic> GetCount(string access_token, string venue_id, DateTime start_date, int? length_in_days = null, List<DateTime> cmp_dates = null)
         {
             // Optional
@@ -108,6 +111,50 @@ namespace Turnstyle.Client
             }
         }
 
+        /// <summary>
+        /// http://api.getturnstyle.com/data/venue/402/lengthdistro?access_token=abc123&start=1383278400&length=1&cmp=1383019200,1383105600
+        /// </summary>
+        /// <remarks>
+        /// Might need to be updated. Still trying to understand the API parameters.
+        /// </remarks>
+        public static async Task<dynamic> GetLengthDistro(string access_token, string venue_id, DateTime start_date, int? length_in_days = null, List<DateTime> cmp_dates = null)
+        {
+            // Optional
+            string length = String.Empty;
+            if (null != length_in_days)
+            {
+                length = String.Format("&length={0}", length_in_days);
+            }
+
+            // Optional
+            string cmp = String.Empty;
+            if (null != cmp_dates)
+            {
+                string dates_string = String.Empty;
+                foreach (DateTime cmp_date in cmp_dates)
+                {
+                    dates_string = String.Concat(dates_string, ",", Helpers.ConvertDateTimeToUnixTime(cmp_date).ToString());
+                }
+
+                // Remove the prepended comma
+                if (dates_string.StartsWith(","))
+                {
+                    dates_string = dates_string.Substring(1);
+                }
+
+                cmp = String.Format("&cmp={0}", dates_string);
+            }
+
+            string requestUri = String.Format("data/venue/{0}/length-distro?access_token={1}&start={2}{3}{4}",
+                venue_id, access_token, Helpers.ConvertDateTimeToUnixTime(start_date), length, cmp);
+
+            using (TurnstyleHttpClient client = new TurnstyleHttpClient())
+            {
+                HttpResponseMessage response = await client.GetAsync(requestUri);
+                string json = response.Content.ReadAsStringAsync().Result;
+                return Json.Decode(json);
+            }
+        }
 
         /// <summary>
         /// http://api.getturnstyle.com/loctrigger?access_token={access_token}&venueID={venueID}&clientMAC={client_mac_address}&rssThreshold={rss_threshold}&webserviceURL={webservice_url}

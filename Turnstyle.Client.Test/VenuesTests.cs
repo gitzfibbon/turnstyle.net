@@ -29,8 +29,22 @@ namespace Turnstyle.Client.Tests
 
             List<DateTime> comparison_dates = new List<DateTime> { DateTime.UtcNow.AddDays(-2), DateTime.UtcNow.AddDays(-1) };
             dynamic visitorsCountWithComparison = TurnstyleApi.GetCount(access_token, venue_id, start_date, 2, comparison_dates).Result;
-
         }
+
+        [TestMethod]
+        public void VisitorsTest2()
+        {
+            string access_token = TurnstyleApi.PostAccess().Result.access_token;
+            string venue_id = TurnstyleApi.GetVenues(access_token).Result[0].id;
+
+            DateTime start_date = DateTime.UtcNow.AddDays(-5);
+
+            dynamic lengthDistroWithComparison = TurnstyleApi.GetLengthDistro(access_token, venue_id, start_date).Result;
+
+            List<DateTime> comparison_dates = new List<DateTime> { DateTime.UtcNow.AddDays(-2), DateTime.UtcNow.AddDays(-1) };
+            dynamic lengthDistroWithoutComparison = TurnstyleApi.GetLengthDistro(access_token, venue_id, start_date, 2, comparison_dates).Result;
+        }
+
 
         [Ignore]
         [TestMethod]

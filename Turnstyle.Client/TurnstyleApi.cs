@@ -98,10 +98,12 @@ namespace Turnstyle.Client
         /// <summary>
         /// http://api.getturnstyle.com/data/venue/{venue_id}/visitor-data?access_token=abc123&start=1370044800&length=1
         /// </summary>
-        public static async Task<dynamic> GetDataVisitors(string access_token, string venue_id, DateTime start_date, int length)
+        public static async Task<dynamic> GetDataVisitors(string access_token, string venue_id, DateTime start_date, int length, string type="V")
         {
-            string requestUri = String.Format("data/venue/{0}/visitor-data?access_token={1}&start={2}&length={3}",
-                venue_id, access_token, Helpers.ConvertDateTimeToUnixTime(start_date), length);
+            string requestUri = String.Format("data/visitor-data-condensed?id={0}&start={1}&length={2}&type={3}&access_token={4}",
+                venue_id, Helpers.ConvertDateTimeToUnixTime(start_date), length, type, access_token);
+
+            
 
             using (TurnstyleHttpClient client = new TurnstyleHttpClient())
             {

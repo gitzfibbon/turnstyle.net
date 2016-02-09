@@ -19,12 +19,11 @@ namespace Turnstyle.Client.Tests
         public void VisitorsTest1()
         {
             string access_token = TurnstyleApi.PostAccess().Result.access_token;
+            string venue_id = TurnstyleApi.GetVenues(access_token).Result[0].id;
 
-            string venue_id = TurnstyleApi.GetVenues(access_token).Result[0].id.ToString();
+            DateTime start_date = DateTime.Parse("2016-01-08");
 
-            DateTime start_date = DateTime.UtcNow.AddDays(-3);
-
-            dynamic visitorsData = TurnstyleApi.GetDataVisitors(access_token, venue_id, start_date, 1).Result;
+            dynamic visitorsData = TurnstyleApi.GetDataVisitors(access_token, venue_id, start_date, 2).Result;
 
             dynamic visitorsCountNoComparison = TurnstyleApi.GetCount(access_token, venue_id, start_date).Result;
 

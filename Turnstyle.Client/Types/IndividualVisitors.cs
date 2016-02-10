@@ -15,7 +15,7 @@ namespace Turnstyle.Client.Types
         {
             this.Visitors = new List<IndividualVisitor>();
 
-            dynamic visitorsData = TurnstyleApi.GetDataVisitors(access_token, venue_id, date, 1).Result;
+            dynamic visitorsData = TurnstyleApi.GetDataVisitors(access_token, venue_id, date, 2).Result;
             var data = visitorsData.data["V" + venue_id][Helpers.ConvertDateTimeToUnixTime(date).ToString()];
 
             if (data == null) { return; }
@@ -39,8 +39,17 @@ namespace Turnstyle.Client.Types
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("key,event_date,mac_id,venue_id,first_seen,last_seen,max_rssi");
 
+
             foreach(IndividualVisitor visitor in this.Visitors)
             {
+                if (minDateTime == null && maxDateTime == null) { } // within range
+                else if (minDateTime == null && (visitor.first_seen < maxDateTime || visitor.last_seen < maxDateTime)) { } // within range
+                else if (maxDateTime == null && (visitor.first_seen > minDateTime || visitor.last_seen > minDateTime)) { } // within range
+                else if (   (visitor.last_seen > minDateTime && visitor.last_seen < maxDateTime)
+                         || (visitor.first_seen > minDateTime && visitor.first_seen < maxDateTime)
+                         || (visitor.first_seen < minDateTime && visitor.last_seen > maxDateTime)) { } // within range
+                else { continue; }
+
                 sb.AppendFormat("{0},{1},{2},{3},{4},{5},{6}",
                     visitor.key,
                     visitor.event_date,

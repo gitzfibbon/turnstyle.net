@@ -5,10 +5,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Turnstyle.Client.Tests
 {
     [TestClass]
-    public class VenuesTests
+    public class Tests
     {
         [TestMethod]
-        public void VenuesTest1()
+        public void TestVenues()
         {
             string access_token = TurnstyleApi.PostAccess().Result.access_token;
             string venue_id = TurnstyleApi.GetVenues(access_token).Result[0].id;
@@ -16,14 +16,14 @@ namespace Turnstyle.Client.Tests
         }
 
         [TestMethod]
-        public void VisitorsTest1()
+        public void TestVisitors1()
         {
             string access_token = TurnstyleApi.PostAccess().Result.access_token;
             string venue_id = TurnstyleApi.GetVenues(access_token).Result[0].id;
 
             DateTime start_date = DateTime.Parse("2016-01-08");
 
-            dynamic visitorsData = TurnstyleApi.GetDataVisitors(access_token, venue_id, start_date, 2).Result;
+            dynamic visitorsData = TurnstyleApi.GetDataVisitors(access_token, venue_id, start_date, 2);
 
             dynamic visitorsCountNoComparison = TurnstyleApi.GetCount(access_token, venue_id, start_date).Result;
 
@@ -32,7 +32,7 @@ namespace Turnstyle.Client.Tests
         }
 
         [TestMethod]
-        public void VisitorsTest2()
+        public void TestVisitors2()
         {
             string access_token = TurnstyleApi.PostAccess().Result.access_token;
             string venue_id = TurnstyleApi.GetVenues(access_token).Result[0].id;
@@ -48,7 +48,7 @@ namespace Turnstyle.Client.Tests
 
         [Ignore]
         [TestMethod]
-        public void LocationTriggerTest1()
+        public void TestLocationTrigger()
         {
             string access_token = TurnstyleApi.PostAccess().Result.access_token;
             string venue_id = TurnstyleApi.GetVenues(access_token).Result[0].id;

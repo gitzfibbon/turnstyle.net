@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Helpers;
 
+using Turnstyle.Client.Types;
+
 namespace Turnstyle.Client
 {
     /// <summary>
@@ -29,8 +31,10 @@ namespace Turnstyle.Client
         /// </summary>
         public static async Task<dynamic> PostAccess()
         {
-            string username = "";
-            string password = "";
+            Credentials credentials = new Credentials(@"C:\test\Turnstyle\APICredentials.xml");
+
+            string username = credentials.Login;
+            string password = credentials.Secret;
 
             FormUrlEncodedContent content = new FormUrlEncodedContent(new[] 
             {
@@ -96,12 +100,12 @@ namespace Turnstyle.Client
 
 
         /// <summary>
-        /// http://api.getturnstyle.com/data/venue/{venue_id}/visitor-data?access_token=abc123&start=1370044800&length=1
+        /// Individual Visitors -- By Entry and Exit Time
         /// </summary>
-        public static async Task<dynamic> GetDataVisitors(string access_token, string venue_id, DateTime start_date, int length)
+        public static async Task<dynamic> GetDataVisitors(string access_token, string venue_id, DateTime start_date, int length, string type = "V")
         {
-            string requestUri = String.Format("data/venue/{0}/visitor-data?access_token={1}&start={2}&length={3}",
-                venue_id, access_token, Helpers.ConvertDateTimeToUnixTime(start_date), length);
+            string requestUri = String.Format("data/visitor-data-condensed?id={0}&start={1}&length={2}&type={3}&access_token={4}",
+                venue_id, Helpers.ConvertDateTimeToUnixTime(start_date), length, type, access_token);
 
             using (TurnstyleHttpClient client = new TurnstyleHttpClient())
             {

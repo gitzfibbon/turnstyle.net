@@ -9,14 +9,18 @@ namespace Turnstyle.Client.Types
 {
     public class IndividualVisitors
     {
-        List<IndividualVisitor> Visitors;
+        public List<IndividualVisitor> Visitors;
 
-        public void GetIndividualVisitors(string access_token, string venue_id, DateTime date)
+        public void GetIndividualVisitors(string access_token, string venue_id, DateTime startDateTime, DateTime endDateTime)
         {
+            int days = (int)(endDateTime - startDateTime).TotalDays + 1;
+
+            if (days <= 0) { return; }
+
             this.Visitors = new List<IndividualVisitor>();
 
-            dynamic visitorsData = TurnstyleApi.GetDataVisitors(access_token, venue_id, date, 2).Result;
-            var data = visitorsData.data["V" + venue_id][Helpers.ConvertDateTimeToUnixTime(date).ToString()];
+            dynamic visitorsData = TurnstyleApi.GetDataVisitors(access_token, venue_id, startDateTime.Date, days).Result;
+            var data = visitorsData.data["V" + venue_id][Helpers.ConvertDateTimeToUnixTime(startDateTime.Date).ToString()];
 
             if (data == null) { return; }
 
@@ -25,31 +29,28 @@ namespace Turnstyle.Client.Types
                 IndividualVisitor visitor = new IndividualVisitor();
                 visitor.key = v["key"];
                 visitor.event_date = v["values"]["event_date"];
-                visitor.mac_id = v["values"]["mac_id"];
+                visitor.mac_id = v["values"]["mac_id"].ToString();
                 visitor.venue_id = v["values"]["venue_id"];
                 visitor.first_seen = DateTime.Parse(v["values"]["first_seen"]);
                 visitor.last_seen = DateTime.Parse(v["values"]["last_seen"]);
                 visitor.max_rssi = v["values"]["max_rssi"];
+
+                if ((visitor.last_seen > startDateTime && visitor.last_seen < endDateTime)
+                 || (visitor.first_seen > startDateTime && visitor.first_seen < endDateTime)
+                 || (visitor.first_seen < startDateTime && visitor.last_seen > endDateTime)) { } // within range
+                else { continue; } // NOT within range
+
                 this.Visitors.Add(visitor);
             }
         }
 
-        public void WriteToCsv(string filePath, DateTime? minDateTime = null, DateTime? maxDateTime = null)
+        public static void WriteToCsv(List<IndividualVisitor> visitors, string filePath)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("key,event_date,mac_id,venue_id,first_seen,last_seen,max_rssi");
 
-
-            foreach(IndividualVisitor visitor in this.Visitors)
+            foreach(IndividualVisitor visitor in visitors)
             {
-                if (minDateTime == null && maxDateTime == null) { } // within range
-                else if (minDateTime == null && (visitor.first_seen < maxDateTime || visitor.last_seen < maxDateTime)) { } // within range
-                else if (maxDateTime == null && (visitor.first_seen > minDateTime || visitor.last_seen > minDateTime)) { } // within range
-                else if (   (visitor.last_seen > minDateTime && visitor.last_seen < maxDateTime)
-                         || (visitor.first_seen > minDateTime && visitor.first_seen < maxDateTime)
-                         || (visitor.first_seen < minDateTime && visitor.last_seen > maxDateTime)) { } // within range
-                else { continue; }
-
                 sb.AppendFormat("{0},{1},{2},{3},{4},{5},{6}",
                     visitor.key,
                     visitor.event_date,
@@ -70,7 +71,7 @@ namespace Turnstyle.Client.Types
     {
         public int key { get; set; }
         public string event_date { get; set; }
-        public int mac_id { get; set; }
+        public string mac_id { get; set; }
         public int venue_id { get; set; }
         public DateTime first_seen { get; set; }
         public DateTime last_seen { get; set; }
